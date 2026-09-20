@@ -1,76 +1,54 @@
 NOVA TECH SOLUTIONS, INC.
-FORM 10-K EXCERPT
-FOR THE FISCAL YEAR ENDED DECEMBER 31, 2025
+FORM 10-K FOR THE FISCAL YEAR ENDED DECEMBER 31, 2025
 
-PART II
-
-ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS (MD&A)
+ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
 
 OVERVIEW
-Nova Tech Solutions, Inc. ("Nova Tech" or the "Company") is a leading provider of enterprise AI-driven software-as-a-service (SaaS) architectures and cloud-native automation infrastructure. Our platform enables enterprise clients to deploy autonomous workflows, manage distributed model pipelines, and optimize operational telemetry. 
-
-During the fiscal year ended December 31, 2025, we experienced robust momentum in our core subscription business, driven by a 42% year-over-year increase in Net Revenue Retention (NRR) among Fortune 500 clients. Conversely, Professional Services revenue declined deliberately by 5.3% as part of a multi-quarter strategic initiative to shift low-margin system integration consulting workflows to our global systems integrator ecosystem.
+Nova Tech Solutions, Inc. is a leading provider of enterprise cloud-based software architectures. For the fiscal year ended December 31, 2025 (FY2025), our total revenue was $165.9 million, representing a 25.0% increase compared to $132.72 million in the fiscal year ended December 31, 2024 (FY2024). Net income for FY2025 was $11.2 million.
 
 RESULTS OF OPERATIONS
 
-The following table sets forth our consolidated statements of operations data for the periods indicated (in thousands):
-
-Fiscal Year Ended December 31,
-                                 2025          2024
+CONSOLIDATED STATEMENT OF OPERATIONS (SUMMARY)
+(Amounts in millions, except percentage data)
+                                 FY2025        FY2024      YoY Change (%)
 Revenues:
-  Subscription License & SaaS  $ 142,500     $ 108,000
-  Professional Services           23,400        24,700
-Total Revenues                   165,900       132,700
+  Subscription Revenue          $142.50       $108.12          31.8%
+  Professional Services          $23.40        $24.60          -4.9%
+Total Revenues                  $165.90       $132.72          25.0%
 
-Cost of Revenues:
-  Subscription & SaaS             21,375        17,280
-  Professional Services           20,124        19,266
-Total Cost of Revenues            41,499        36,546
+Cost of Revenues (COGS):
+  Subscription COGS              $28.50        $22.00          29.5%
+  Professional Services COGS     $20.12        $19.19           4.8%
+Total COGS                       $48.62        $41.19          18.0%
 
-Gross Profit                     124,401        96,154
+Gross Profit                    $117.28        $91.53          28.1%
 
 Operating Expenses:
-  Research & Development (R&D)    42,100        34,800
-  Sales & Marketing (S&M)         48,600        41,200
-  General & Administrative (G&A)  18,900        16,400
-Total Operating Expenses         109,600        92,400
+  Research & Development (R&D)   $42.00        $35.00          20.0%
+  Sales & Marketing (S&M)        $50.00        $40.00          25.0%
+  General & Administrative (G&A) $11.08        $10.53           5.2%
+Total Operating Expenses       $103.08        $85.53          20.5%
 
-Operating Income                  14,801         3,754
-Interest Expense & Other, net       (650)         (400)
-Income Before Income Taxes        14,151         3,354
-Provision for Income Taxes         2,972           704
-Net Income                     $  11,179     $   2,650
+Operating Income                 $14.20         $6.00         136.7%
+Provision for Income Taxes        $3.00         $1.20         150.0%
+Net Income                       $11.20         $4.80         133.3%
 
-REVENUE METRICS & ANALYSIS
-Our total revenues increased by $33,200 thousand, or 25.0%, for the year ended December 31, 2025, compared to the year ended December 31, 2024. 
 
-* Subscription License & SaaS: Increased by $34,500 thousand, or 31.9%. Growth was primarily accelerated by the wide-scale market adoption of our "NovaNexus" multi-agent coordination orchestrator, released in Q1 2025. 
-* Professional Services: Decreased by $1,300 thousand, or 5.3%. This intentional deceleration reflects our ongoing transition toward a pure-play recurring revenue software mix. Margins on professional services compressed from 22.0% in 2024 to 14.0% in 2025 due to transitionary severance and contractor exit expenses.
+CONSOLIDATED BALANCE SHEET DATA (SUMMARY)
+(Amounts in millions)
+                                 FY2025        FY2024
+Assets:
+  Cash and Cash Equivalents      $45.20        $31.40
+  Accounts Receivable            $18.50        $14.10
+Total Assets                     $63.70        $45.50
 
-OPERATING EXPENSES & EFFICIENCIES
-* Research & Development (R&D): Increased by 21.0% due to aggressive engineering headcount expansion in our foundational multi-modal research track.
-* Sales & Marketing (S&M): Increased by 18.0%. S&M leverage improved by 170 basis points as digital self-serve pipelines and automated product-led growth (PLG) triggers deflected higher client acquisition acquisition costs.
-* General & Administrative (G&A): Increased by 15.2% due to public company compliance, cybersecurity insurance premiums, and localized legal infrastructure expenses.
+Liabilities and Equity:
+  Deferred Revenue               $38.50        $29.00
+  Other Liabilities              $10.00         $8.50
+Total Liabilities                $48.50        $37.50
+Total Stockholders' Equity       $15.20         $8.00
+Total Liabilities & Equity       $63.70        $45.50
 
-LIQUIDITY AND CAPITAL RESOURCES
-As of December 31, 2025, our principal sources of liquidity were cash, cash equivalents, and short-term marketable securities totaling $45,200 thousand, compared to $31,450 thousand as of December 31, 2024. 
 
-We believe that our existing cash balances, combined with cash generated from forward subscription operations, will be sufficient to satisfy our anticipated working capital, capital expenditure, and operational lease commitments for at least the next 24 months.
-
-Consolidated Balance Sheets Data Excerpt (in thousands):
-                                  December 31, 2025    December 31, 2024
-ASSETS
-Cash and Cash Equivalents               $  45,200            $  31,450
-Accounts Receivable, net                   18,400               14,100
-Prepaid Expenses and Other                  3,100                2,850
-Total Current Assets                       66,700               48,400
-Property and Equipment, net                12,500               11,200
-Total Assets                            $  79,200            $  59,600
-
-LIABILITIES & STOCKHOLDERS' EQUITY
-Accounts Payable                        $   4,200            $   3,900
-Deferred Revenue                           38,500               29,000
-Total Current Liabilities                  42,700               32,900
-Long-term Debt                             10,000               12,000
-Total Stockholders' Equity                 26,500               14,700
-Total Liabilities & Equity              $  79,200            $  59,600
+NARRATIVE ANALYSIS OF REVENUE CHANNELS
+Our core platform acceleration drove subscription revenues up 31.8% to $142.50 million, up from $108.12 million in FY2024. Conversely, Professional Services revenue declined by 4.9% to $23.40 million in FY2025 down from $24.60 million in FY2024. This deliberate contraction highlights our migration away from low-margin, high-overhead localized deployments toward unified partner-led distribution channels. Due to residual support on legacy accounts, Professional Services COGS increased slightly to $20.12 million, compressing our gross margins on services down to 14.0% relative to the 22.0% achieved in FY2024. Cash balances concluded the year at $45.20 million, positioning us with an estimated 24 months of operational cash runway based on current strategic spending patterns.

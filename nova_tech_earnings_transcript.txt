@@ -1,16 +1,14 @@
-NOVA TECH SOLUTIONS, INC.
-Q4 2025 EARNINGS CALL TRANSCRIPT
+NOVA TECH SOLUTIONS, INC. FY2025 EARNINGS CALL TRANSCRIPT
 DATE: JANUARY 28, 2026
 
-Corporate Participants:
-Sarah Jenkins - CEO
-Mark Alvarez - CFO
+Sarah Jenkins (CEO):
+"Good afternoon, everyone. FY2025 was a defining year for Nova Tech Solutions. We cleared our revenue guidance targets to deliver a record $165.9 million in top-line total revenue, representing a strict 25.0% expansion year-over-year. This growth was structurally driven by our high-margin subscription layer, which pulled in $142.50 million on its own."
 
-Presentation Excerpt:
-Sarah Jenkins: "Good afternoon, everyone. 2025 was a milestone year for Nova Tech. We successfully crossed the $125 million revenue mark and rolled out our next-generation enterprise suite. Our focus on operational efficiency expanded our margins by 200 basis points. Looking ahead to 2026, we are closely watching international macroeconomic headwinds, but we remain confident in our domestic growth pipeline."
+Mark Alvarez (CFO):
+"Thank you, Sarah. To add specific context to the balance sheet and operational expenditures, we concluded the fiscal year with a healthy cash balance of $45.20 million. Our total net income reached $11.2 million, up from $4.8 million in FY2024. I want to address our intentional strategic pivot regarding Professional Services revenue, which came in at $23.40 million this year compared to $24.60 million last year. We are proactively migrating delivery dependencies to global system integrators. While this created temporary margin compression in our services delivery segment—hitting a gross profit margin of 14.0% as professional services COGS stood at $20.12 million—it unlocks massive operational leverage for our primary software infrastructure."
 
-Mark Alvarez: "Thank you, Sarah. Let me add color to the numbers. While subscription momentum was stellar, our professional services revenue did experience a minor 5% drag, hitting $15.0 million exactly, down from $15.8 million last year. This was entirely intentional as we offloaded low-margin consulting work to third-party integrators. Our R&D lift to $25.0 million represents our aggressive bet on AI primitives."
+Michael Chang (Analyst - Vanguard Research):
+"Thanks for taking the question. Mark, can you break down the professional services line? It dropped to $23.40 million, and the margin structure compressed. Should we anticipate this drag continuing into 2026?"
 
-Questions and Answers Excerpt:
-Analyst (Goldman Sachs): "Can you talk about cash positions and capital allocation for 2026?"
-Mark Alvarez: "We finished the year strong with $45.2 million in cash. Our first priority is funding organic R&D. We are not actively looking at M&A right now, given valuation volatility, but we will protect our runway."
+Mark Alvarez (CFO):
+"Appreciate the question, Michael. The short answer is no. The $23.40 million revenue figure reflects the final tranches of legacy customization contracts we chose not to renew. As those obligations wind down, the associated $20.12 million services cost burden will drop off far faster than the corresponding revenues, clearing our path toward high-margin software predictability.".
