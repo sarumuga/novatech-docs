@@ -1,0 +1,392 @@
+{
+  "name": "Retrieval Benchmark",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        -416
+      ],
+      "id": "0b775a54-2f0b-4376-89fc-3442da0dab1d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const queries = [\n  { q: \"What was total revenue in fiscal 2025?\", answer: \"165.9\", type: \"factual\" },\n  { q: \"How much cash and cash equivalents did the company hold at year end?\", answer: \"45.20\", type: \"factual\" },\n  { q: \"What was net income in FY2024?\", answer: \"4.8\", type: \"factual\" },\n  { q: \"What was research and development spending in FY2025?\", answer: \"42.00\", type: \"factual\" },\n  { q: \"What was total stockholders' equity?\", answer: \"15.20\", type: \"factual\" },\n  { q: \"What was the year-over-year growth rate of total sales?\", answer: \"25.0%\", type: \"paraphrase\" },\n  { q: \"Why did Professional Services revenue decline?\", answer: \"low-margin\", type: \"contextual\" },\n  { q: \"Will the drag from the services business continue into next year?\", answer: \"legacy customization\", type: \"contextual\" },\n  { q: \"How long can the company operate using its current cash?\", answer: \"24 months\", type: \"paraphrase\" },\n  { q: \"What happened to gross margin on services?\", answer: \"14.0%\", type: \"contextual\" }\n];\nconst strategies = ['fixed', 'semantic', 'section'];\nconst out = [];\nqueries.forEach((c, qi) => {\n  strategies.forEach(s => out.push({ json: { qid: qi + 1, ...c, strategy: s } }));\n});\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        -416
+      ],
+      "id": "594a0bd7-c042-4e61-94ee-1e4b5f84d5a9",
+      "name": "Test Queries"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "novatech-financial-knowledgebase",
+          "mode": "list",
+          "cachedResultName": "novatech-financial-knowledgebase"
+        },
+        "prompt": "={{ $json.q }}",
+        "topK": 3,
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "strategy",
+                "value": "={{ $json.strategy }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -720,
+        -656
+      ],
+      "id": "66d0eb2a-2eaa-4cde-b5fa-984fc5b241f7",
+      "name": "Retrieve baseline",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KfqcqK7IFwMfOobt",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "thenlper/gte-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -480
+      ],
+      "id": "8dbea858-4573-4112-a49e-f5d83964ceff",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "xaRuqbuOdz1JOxba",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const CONFIG = 'baseline (top-3)';\nconst rows = $input.all().map(i => i.json);\n\n// Integrity checks\nconst wrong = rows.filter(r => r.chunk_strategy !== r.strategy);\nif (wrong.length) throw new Error(`${wrong.length} chunks came from the wrong strategy - filter not applied`);\nconst byQuery = {};\nrows.forEach(r => { (byQuery[r.qid + '|' + r.strategy] = byQuery[r.qid + '|' + r.strategy] || []).push(r); });\nconst badCounts = Object.entries(byQuery).filter(([k, v]) => v.length !== 3).map(([k]) => k);\nif (badCounts.length) throw new Error('Not exactly 3 chunks for: ' + badCounts.join(', '));\n\n// Per-query scoring\nconst perQuery = Object.values(byQuery).map(chunks => {\n  const f = chunks[0];\n  const ans = String(f.answer).toLowerCase();\n  const rank = chunks.findIndex(c => c.chunk.toLowerCase().includes(ans));\n  return {\n    config: CONFIG, qid: f.qid, question: f.q, type: f.type, strategy: f.strategy,\n    hit: rank >= 0 ? 1 : 0,\n    rr: rank >= 0 ? +(1 / (rank + 1)).toFixed(3) : 0,\n    hit_rank: rank >= 0 ? rank + 1 : null,\n    hit_source: rank >= 0 ? chunks[rank].chunk_label : null,\n    avg_chars: Math.round(chunks.reduce((a, c) => a + c.chunk.length, 0) / chunks.length),\n    linked_by: f.linked_by\n  };\n});\n\n// Summary per strategy and per strategy + query type\nreturn perQuery.map(j => ({ json: j }));\n\n\nreturn [...summary, ...perQuery].map(j => ({ json: j }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -656
+      ],
+      "id": "d8f39215-3991-4e47-86a4-8ac44661f0d4",
+      "name": "Score baseline"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json);\nconst g = {};\nconst add = (k, cfg, r) => {\n  const x = g[k] = g[k] || { config: cfg, n: 0, hit: 0, rr: 0, chars: 0 };\n  x.n++; x.hit += r.hit; x.rr += r.rr; x.chars += r.avg_chars;\n};\nrows.forEach(r => {\n  add(r.config + ' | ' + r.strategy, r.config, r);\n  add(r.config + ' | ' + r.strategy + ' | ' + r.type, r.config, r);\n});\nreturn Object.entries(g).map(([k, x]) => ({ json: {\n  config: x.config,\n  group: k.replace(x.config + ' | ', ''),\n  queries: x.n,\n  hit_at_3: +(x.hit / x.n).toFixed(2),\n  mrr: +(x.rr / x.n).toFixed(2),\n  avg_chars: Math.round(x.chars / x.n)\n}}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -496
+      ],
+      "id": "5ea03529-d23f-4858-b789-22d402e90975",
+      "name": "Summary Table"
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "novatech-financial-knowledgebase",
+          "mode": "list",
+          "cachedResultName": "novatech-financial-knowledgebase"
+        },
+        "prompt": "={{ $json.q }}",
+        "topK": 8,
+        "useReranker": true,
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "strategy",
+                "value": "={{ $json.strategy }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -736,
+        -304
+      ],
+      "id": "02ba453b-7e7d-4065-8e9d-51dffdb6f992",
+      "name": "Retrieve rerank",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KfqcqK7IFwMfOobt",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "thenlper/gte-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -96
+      ],
+      "id": "a53722c4-cee1-4597-bd7d-4ea86c817a01",
+      "name": "Embeddings HuggingFace Inference1",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "xaRuqbuOdz1JOxba",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -96
+      ],
+      "id": "fb01b93f-ad2b-408d-989c-adc16751ac33",
+      "name": "Reranker Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "e3Qwtg4dQbvX6yCH",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let q, linked_by = 'pairedItem';\ntry {\n  q = $('Test Queries').item.json;\n} catch (e) {\n  q = $('Test Queries').all()[Math.floor($itemIndex / 3)].json;\n  linked_by = 'position';\n}\nconst d = $json.document || $json;\nreturn { json: {\n  qid: q.qid, q: q.q, type: q.type, strategy: q.strategy, answer: q.answer,\n  chunk: d.pageContent || '',\n  chunk_strategy: (d.metadata || {}).strategy,\n  chunk_label: (d.metadata || {}).label,\n  score: $json.score,\n  linked_by\n}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        -656
+      ],
+      "id": "07a068c1-ff28-4c72-944c-6d2707dbd974",
+      "name": "Tag Results (baseline)"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let q, linked_by = 'pairedItem';\ntry {\n  q = $('Test Queries').item.json;\n} catch (e) {\n  q = $('Test Queries').all()[Math.floor($itemIndex / 3)].json;\n  linked_by = 'position';\n}\nconst d = $json.document || $json;\nreturn { json: {\n  qid: q.qid, q: q.q, type: q.type, strategy: q.strategy, answer: q.answer,\n  chunk: d.pageContent || '',\n  chunk_strategy: (d.metadata || {}).strategy,\n  chunk_label: (d.metadata || {}).label,\n  score: $json.score,\n  linked_by\n}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        -304
+      ],
+      "id": "53df3a29-adf0-45e6-a95c-2717af94f8d3",
+      "name": "Tag Results (rerank)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const CONFIG = 'rerank (8→3)';\nconst rows = $input.all().map(i => i.json);\n\n// Integrity checks\nconst wrong = rows.filter(r => r.chunk_strategy !== r.strategy);\nif (wrong.length) throw new Error(`${wrong.length} chunks came from the wrong strategy - filter not applied`);\nconst byQuery = {};\nrows.forEach(r => { (byQuery[r.qid + '|' + r.strategy] = byQuery[r.qid + '|' + r.strategy] || []).push(r); });\nconst badCounts = Object.entries(byQuery).filter(([k, v]) => v.length !== 3).map(([k]) => k);\nif (badCounts.length) throw new Error('Not exactly 3 chunks for: ' + badCounts.join(', '));\n\n// Per-query scoring\nconst perQuery = Object.values(byQuery).map(chunks => {\n  const f = chunks[0];\n  const ans = String(f.answer).toLowerCase();\n  const rank = chunks.findIndex(c => c.chunk.toLowerCase().includes(ans));\n  return {\n    config: CONFIG, qid: f.qid, question: f.q, type: f.type, strategy: f.strategy,\n    hit: rank >= 0 ? 1 : 0,\n    rr: rank >= 0 ? +(1 / (rank + 1)).toFixed(3) : 0,\n    hit_rank: rank >= 0 ? rank + 1 : null,\n    hit_source: rank >= 0 ? chunks[rank].chunk_label : null,\n    avg_chars: Math.round(chunks.reduce((a, c) => a + c.chunk.length, 0) / chunks.length),\n    linked_by: f.linked_by\n  };\n});\n\n// Summary per strategy and per strategy + query type\nreturn perQuery.map(j => ({ json: j }));\n\n\nreturn [...summary, ...perQuery].map(j => ({ json: j }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -288
+      ],
+      "id": "205c7c96-de9b-4275-8d8f-5557a7330321",
+      "name": "Score rerank"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        272,
+        -496
+      ],
+      "id": "02bacf03-12dc-4cdb-ba65-d0cdbdba9d3a",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Test Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Queries": {
+      "main": [
+        [
+          {
+            "node": "Retrieve rerank",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Retrieve baseline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Retrieve baseline",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve baseline": {
+      "main": [
+        [
+          {
+            "node": "Tag Results (baseline)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score baseline": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve rerank": {
+      "main": [
+        [
+          {
+            "node": "Tag Results (rerank)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Retrieve rerank",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Retrieve rerank",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Results (baseline)": {
+      "main": [
+        [
+          {
+            "node": "Score baseline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Results (rerank)": {
+      "main": [
+        [
+          {
+            "node": "Score rerank",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Summary Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score rerank": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f59da26d-045e-4c74-a12c-677f1a13ff9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "93f7ce5f7d586f4d0d0a1e31ffb7f095df69efe7cf0a7749bd7d377a59d44c4b"
+  },
+  "nodeGroups": [],
+  "id": "cjEMpD8wXxoP6nNz",
+  "tags": []
+}

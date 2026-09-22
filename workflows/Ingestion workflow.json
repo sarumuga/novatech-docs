@@ -1,0 +1,543 @@
+{
+  "name": "Ingestion workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -240
+      ],
+      "id": "8197916d-2a54-4a45-894d-8364d9c49e9f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { label: 'nova_tech_10k_extended', url: 'https://raw.githubusercontent.com/sarumuga/novatech-docs/main/nova_tech_10k_extended.txt' } },\n  { json: { label: 'nova_tech_earnings_transcript', url: 'https://raw.githubusercontent.com/sarumuga/novatech-docs/main/nova_tech_earnings_transcript.txt' } },\n  { json: { label: 'nova_tech_press_release', url: 'https://raw.githubusercontent.com/sarumuga/novatech-docs/main/nova_tech_press_release.txt' } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        -240
+      ],
+      "id": "fd6187b9-d048-46bb-ab71-8e0c9d1efbf8",
+      "name": "Document Manifest"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -32,
+        -240
+      ],
+      "id": "94916d75-ec81-4528-9356-1ad04e6d9d8e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1e635c0e-d676-4098-a516-d7fa75b2e38f",
+              "name": "content",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            },
+            {
+              "id": "6589ac1e-83e2-4d10-bbfd-ffe7a9e45ceb",
+              "name": "label",
+              "value": "={{ $('Document Manifest').item.json.label }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        -240
+      ],
+      "id": "c778a2d9-863b-44d6-a1e9-4cf822fce4a2",
+      "name": "Set Content"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "novatech-financial-knowledgebase",
+          "mode": "list",
+          "cachedResultName": "novatech-financial-knowledgebase"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        -480
+      ],
+      "id": "2e6a5844-5035-457a-98d2-598134784ed0",
+      "name": "Pinecone Fixed",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KfqcqK7IFwMfOobt",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "thenlper/gte-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -336
+      ],
+      "id": "589cf94d-b676-4cce-b497-55a61e8dc2f2",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "xaRuqbuOdz1JOxba",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "label",
+                "value": "={{ $json.label }}"
+              },
+              {
+                "name": "strategy",
+                "value": "fixed"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        -336
+      ],
+      "id": "a76192af-6e68-43d5-956d-6736ceba497a",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -208
+      ],
+      "id": "ac513444-fa95-43be-8184-115346f2ba9e",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "=novatech-financial-knowledgebase",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        -80
+      ],
+      "id": "25263a84-c4a5-4ab5-b226-350d2ef3e227",
+      "name": "Pinecone - Semantic",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KfqcqK7IFwMfOobt",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "thenlper/gte-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        464,
+        112
+      ],
+      "id": "335ae4cc-fdc1-41f2-b05c-62a2d262f3b3",
+      "name": "Embeddings HuggingFace Inference1",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "xaRuqbuOdz1JOxba",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=label",
+                "value": "={{ $json.label }}"
+              },
+              {
+                "name": "strategy",
+                "value": "semantic"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        96
+      ],
+      "id": "7f4c6bc9-0b9e-4ebc-b834-702909eb3155",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1500,
+        "chunkOverlap": 300,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        688,
+        240
+      ],
+      "id": "8c6fe32f-7b6c-4ffa-af3b-bc23010419dd",
+      "name": "Recursive Character Text Splitter1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\nfor (const item of $input.all()) {\n  const label = item.json.label;\n  const lines = String(item.json.content).split(/\\r?\\n/);\n  let cur = { title: [], body: [] };\n  let prevBlank = false;\n  const flush = () => {\n    if (cur.body.length) {\n      const content = [...cur.title, ...cur.body].join('\\n').trim();\n      if (content.length > 30) out.push({ json: { label, section: cur.title.join(' | '), content } });\n    }\n    cur = { title: [], body: [] };\n  };\n  for (const raw of lines) {\n    const t = raw.trim();\n    if (!t) { prevBlank = true; continue; }\n    const isHeading = /[A-Z]/.test(t) && !/[a-z]/.test(t) && t.length >= 6;\n    const isSpeaker = /^[A-Z][A-Za-z.' -]+ \\([^)]+\\):$/.test(t);\n    const isQuoteStart = prevBlank && t.startsWith('\"') && cur.body.length > 0;\n    if (isHeading || isSpeaker) {\n      if (cur.body.length) flush();\n      cur.title.push(t);\n    } else if (isQuoteStart) {\n      flush();\n      cur.title.push('Quote');\n      cur.body.push(t);\n    } else {\n      cur.body.push(t);\n    }\n    prevBlank = false;\n  }\n  flush();\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        16
+      ],
+      "id": "db511975-e835-43c2-845c-8640110151a1",
+      "name": "Section Splitter"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "novatech-financial-knowledgebase",
+          "mode": "list",
+          "cachedResultName": "novatech-financial-knowledgebase"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        16
+      ],
+      "id": "4e8dae7b-5d08-4a98-95f4-8a2b454fea68",
+      "name": "Pinecone - Section",
+      "credentials": {
+        "pineconeApi": {
+          "id": "KfqcqK7IFwMfOobt",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "thenlper/gte-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        176
+      ],
+      "id": "63705eda-85c7-43f6-a1fa-e18e59139f85",
+      "name": "Embeddings HuggingFace Inference2",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "xaRuqbuOdz1JOxba",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "label",
+                "value": "={{ $json.label }}"
+              },
+              {
+                "name": "section",
+                "value": "={{ $json.section }}"
+              },
+              {
+                "name": "strategy",
+                "value": "section"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "42ef663e-5e60-469a-abb7-3ba819af99d5",
+      "name": "Default Data Loader2"
+    },
+    {
+      "parameters": {
+        "chunkSize": 4000,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        320
+      ],
+      "id": "25342f33-fec3-4f48-bfca-4b7178a97975",
+      "name": "Recursive Character Text Splitter2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Document Manifest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Manifest": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Set Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Content": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Fixed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Section Splitter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pinecone - Semantic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Fixed",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Fixed",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone - Semantic",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone - Semantic",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Section Splitter": {
+      "main": [
+        [
+          {
+            "node": "Pinecone - Section",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone - Section",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader2": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone - Section",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter2": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader2",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "38407a0e-70a9-49a6-a4c9-1e3fe3eedbf6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "93f7ce5f7d586f4d0d0a1e31ffb7f095df69efe7cf0a7749bd7d377a59d44c4b"
+  },
+  "nodeGroups": [],
+  "id": "EFj5NGfU53Trsehd",
+  "tags": []
+}
